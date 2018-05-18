@@ -106,20 +106,20 @@ namespace TicTacToe
 
         private void AIsTurn()
         {
-            List<int> list = RemainingIndexis();
+            List<int> list = RemainingIndexis(board);
             Random random = new Random();
-            int temp = random.Next(0, list.Count);
-            MarkIndex( list[temp] );
+            int index = random.Next(0, list.Count);
+            MarkIndex( list[index] );
 
             CheckForWinner();
         }
 
-        private List<int> RemainingIndexis()
+        private List<int> RemainingIndexis(MarkType[] newBoard)
         {
             List<int> list = new List<int>();
-            for(int i=0; i<board.Length; i++)
+            for(int i=0; i< newBoard.Length; i++)
             {
-                if (board[i] == MarkType.Free)
+                if (newBoard[i] == MarkType.Free)
                 {
                     list.Add(i);
                 }
@@ -145,10 +145,37 @@ namespace TicTacToe
             board[index] = MarkType.Nought;
         }
 
+        private bool CanWin(MarkType[] board, bool isPlayer)
+        {
+
+            MarkType player = isPlayer ? MarkType.Cross : MarkType.Nought;
+
+            if ((board[0] != MarkType.Free && ((board[0] & board[1] & board[2]) == player)) ||
+                (board[3] != MarkType.Free && ((board[3] & board[4] & board[5]) == player)) ||
+                (board[6] != MarkType.Free && ((board[6] & board[7] & board[8]) == player)) ||
+                (board[0] != MarkType.Free && ((board[0] & board[3] & board[6]) == player)) ||
+                (board[1] != MarkType.Free && ((board[1] & board[4] & board[7]) == player)) ||
+                (board[2] != MarkType.Free && ((board[2] & board[5] & board[8]) == player)) ||
+                (board[0] != MarkType.Free && ((board[0] & board[4] & board[8]) == player)) ||
+                (board[2] != MarkType.Free && ((board[2] & board[4] & board[6]) == player))
+                )
+            {
+                return true;
+            }
+            else return false;
+            
+        }
+
+        private int MiniMax(MarkType[] newBoard, bool player)
+        {
+            List<int> emptyIndexis = RemainingIndexis(newBoard);
+            return 0;
+        }
+
         private void CheckForWinner()
         {
             //Check Horizontals
-            
+
             if( board[0] != MarkType.Free && ((board[0] & board[1] & board[2]) == board[0]))
             {
                 mGameEnded = true;
