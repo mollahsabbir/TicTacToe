@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Linq;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -24,7 +23,7 @@ namespace TicTacToe
 
         #region Private Members
 
-        private MarkType[] mResults;
+        private MarkType[] board;
 
         private bool mPlayer1Turn;
 
@@ -47,10 +46,10 @@ namespace TicTacToe
 
         private void NewGame()
         {
-            mResults = new MarkType[9];
-            for(int i = 0 ; i < mResults.Length ; i++ )
+            board = new MarkType[9];
+            for(int i = 0 ; i < board.Length ; i++ )
             {
-                mResults[i] = MarkType.Free;
+                board[i] = MarkType.Free;
             }
 
             mPlayer1Turn = true;
@@ -79,12 +78,13 @@ namespace TicTacToe
 
             var index = column + (row * 3);
 
-            if( mResults[index]!= MarkType.Free)
+            if( board[index]!= MarkType.Free)
             {
+                //if Button already marked
                 return;
             }
 
-            mResults[index] = mPlayer1Turn ? MarkType.Cross : MarkType.Nought;
+            board[index] = MarkType.Cross;
 
             button.Content = mPlayer1Turn ? "X" : "O"  ;
 
@@ -93,62 +93,109 @@ namespace TicTacToe
                 button.Foreground = Brushes.Red;
             }
 
-            mPlayer1Turn = !mPlayer1Turn;   //mPlayerTurn ^= true;
+            //mPlayer1Turn = !mPlayer1Turn;   //mPlayerTurn ^= true;
 
             CheckForWinner();
+
+            if (!mGameEnded)
+            {
+                AIsTurn();
+            }
+            
+        }
+
+        private void AIsTurn()
+        {
+            List<int> list = RemainingIndexis();
+            Random random = new Random();
+            int temp = random.Next(0, list.Count);
+            MarkIndex( list[temp] );
+
+            CheckForWinner();
+        }
+
+        private List<int> RemainingIndexis()
+        {
+            List<int> list = new List<int>();
+            for(int i=0; i<board.Length; i++)
+            {
+                if (board[i] == MarkType.Free)
+                {
+                    list.Add(i);
+                }
+            }
+            return list;
+        }
+
+        private void MarkIndex(int index)
+        {
+            Container.Children.Cast<Button>().ToList().ForEach(button =>
+            {
+
+                var column = Grid.GetColumn(button);
+                var row = Grid.GetRow(button);
+
+                if ( row == index/3 && column == index%3 )
+                {
+                    button.Foreground = Brushes.Red;
+                    button.Content = "O";
+                }
+            });
+
+            board[index] = MarkType.Nought;
         }
 
         private void CheckForWinner()
         {
             //Check Horizontals
             
-            if( mResults[0] != MarkType.Free && ((mResults[0] & mResults[1] & mResults[2]) == mResults[0]))
+            if( board[0] != MarkType.Free && ((board[0] & board[1] & board[2]) == board[0]))
             {
                 mGameEnded = true;
                 Button0_0.Background = Button1_0.Background = Button2_0.Background = Brushes.Green;
             }
-            if (mResults[3] != MarkType.Free && ((mResults[3] & mResults[4] & mResults[5]) == mResults[3]))
+            if (board[3] != MarkType.Free && ((board[3] & board[4] & board[5]) == board[3]))
             {
                 mGameEnded = true;
                 Button0_1.Background = Button1_1.Background = Button2_1.Background = Brushes.Green;
             }
-            if (mResults[6] != MarkType.Free && ((mResults[6] & mResults[7] & mResults[8]) == mResults[6]))
+            if (board[6] != MarkType.Free && ((board[6] & board[7] & board[8]) == board[6]))
             {
                 mGameEnded = true;
                 Button0_2.Background = Button1_2.Background = Button2_2.Background = Brushes.Green;
             }
 
             //Check Verticals
-            if (mResults[0] != MarkType.Free && ((mResults[0] & mResults[3] & mResults[6]) == mResults[0]))
+            if (board[0] != MarkType.Free && ((board[0] & board[3] & board[6]) == board[0]))
             {
                 mGameEnded = true;
                 Button0_0.Background = Button0_1.Background = Button0_2.Background = Brushes.Green;
             }
-            if (mResults[1] != MarkType.Free && ((mResults[1] & mResults[4] & mResults[7]) == mResults[1]))
+            if (board[1] != MarkType.Free && ((board[1] & board[4] & board[7]) == board[1]))
             {
                 mGameEnded = true;
                 Button1_0.Background = Button1_1.Background = Button1_2.Background = Brushes.Green;
             }
-            if (mResults[2] != MarkType.Free && ((mResults[2] & mResults[5] & mResults[8]) == mResults[2]))
+            if (board[2] != MarkType.Free && ((board[2] & board[5] & board[8]) == board[2]))
             {
                 mGameEnded = true;
                 Button2_0.Background = Button2_1.Background = Button2_2.Background = Brushes.Green;
             }
 
             //Check Obliques
-            if (mResults[0] != MarkType.Free && ((mResults[0] & mResults[4] & mResults[8]) == mResults[0]))
+            if (board[0] != MarkType.Free && ((board[0] & board[4] & board[8]) == board[0]))
             {
                 mGameEnded = true;
                 Button0_0.Background = Button1_1.Background = Button2_2.Background = Brushes.Green;
             }
-            else if (mResults[2] != MarkType.Free && ((mResults[2] & mResults[4] & mResults[6]) == mResults[2]))
+            else if (board[2] != MarkType.Free && ((board[2] & board[4] & board[6]) == board[2]))
             {
                 mGameEnded = true;
                 Button2_0.Background = Button1_1.Background = Button0_2.Background = Brushes.Green;
             }
 
             //Check Full Board
-            if (!mResults.Any(result => result == MarkType.Free) && !mGameEnded )
+            if (!board.Any(result => result == MarkType.Free) && !mGameEnded )
             {
                 mGameEnded = true;
 
