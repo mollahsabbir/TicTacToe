@@ -141,14 +141,14 @@ namespace TicTacToe
                 mGameEnded = true;
                 Button0_0.Background = Button1_1.Background = Button2_2.Background = Brushes.Green;
             }
-            if (mResults[2] != MarkType.Free && ((mResults[2] & mResults[4] & mResults[6]) == mResults[2]))
+            else if (mResults[2] != MarkType.Free && ((mResults[2] & mResults[4] & mResults[6]) == mResults[2]))
             {
                 mGameEnded = true;
                 Button2_0.Background = Button1_1.Background = Button0_2.Background = Brushes.Green;
             }
 
             //Check Full Board
-            if (!mResults.Any(result => result == MarkType.Free))
+            if (!mResults.Any(result => result == MarkType.Free) && !mGameEnded )
             {
                 mGameEnded = true;
 
