@@ -106,11 +106,11 @@ namespace TicTacToe
 
         private void AIsTurn()
         {
-            List<int> list = RemainingIndexis(board);
+            /*List<int> list = RemainingIndexis(board);
             Random random = new Random();
-            int index = random.Next(0, list.Count);
-            MarkIndex( list[index] );
-
+            int index = random.Next(0, list.Count);*/
+            
+            MarkIndex( MiniMax() );
             CheckForWinner();
         }
 
@@ -166,17 +166,11 @@ namespace TicTacToe
             
         }
 
-        private int MiniMax(MarkType[] newBoard, bool player)
-        {
-            List<int> emptyIndexis = RemainingIndexis(newBoard);
-            return 0;
-        }
-
         private void CheckForWinner()
         {
             //Check Horizontals
 
-            if( board[0] != MarkType.Free && ((board[0] & board[1] & board[2]) == board[0]))
+            if (board[0] != MarkType.Free && ((board[0] & board[1] & board[2]) == board[0]))
             {
                 mGameEnded = true;
                 Button0_0.Background = Button1_0.Background = Button2_0.Background = Brushes.Green;
@@ -222,16 +216,106 @@ namespace TicTacToe
             }
 
             //Check Full Board
-            if (!board.Any(result => result == MarkType.Free) && !mGameEnded )
+            if (!board.Any(result => result == MarkType.Free) && !mGameEnded)
             {
                 mGameEnded = true;
 
                 //Turn all cells orange
                 Container.Children.Cast<Button>().ToList().ForEach(button =>
                 {
-                    button.Background = Brushes.Orange;                
+                    button.Background = Brushes.Orange;
                 });
             }
         }
+
+
+        #region MiniMax
+
+        private int MiniMax()
+        {
+            int index = 0;
+            int score = int.MaxValue-1;
+            Move move = new Move();
+
+            List<int> emptyList = RemainingIndexis(board);
+
+            for (int i = 0; i < emptyList.Count; i++)
+            {
+                board[emptyList[i]] = MarkType.Nought;
+
+                int temp = MaxSearch();
+
+                if (temp < score)
+                {
+                    score = temp;
+                    index = emptyList[i];
+                }
+
+                board[emptyList[i]] = MarkType.Free;
+            }
+
+            return index;
+
+        }
+
+        private int MaxSearch()
+        {
+            List<int> emptyList = RemainingIndexis(board);
+
+            if (CanWin(board, true))
+            {
+                return 10;
+            }
+            else if (CanWin(board, false))
+            {
+                return -10;
+            }
+            else if ( emptyList.Count == 0 )
+            {
+                return 0;
+            }
+
+            int score = int.MinValue;
+
+            for (int i = 0; i < emptyList.Count; i++)
+            {
+                board[emptyList[i]] = MarkType.Cross;
+                score = Math.Max(score, MinSearch());
+                board[emptyList[i]] = MarkType.Free;
+            }
+
+            return score;
+        }
+
+        private int MinSearch()
+        {
+            List<int> emptyList = RemainingIndexis(board);
+            if (CanWin(board, true))
+            {
+                return 10;
+            }
+            else if (CanWin(board, false))
+            {
+                return -10;
+            }
+            else if (emptyList.Count == 0)
+            {
+                return 0;
+            }
+
+            int score = int.MaxValue-1;
+
+            for (int i = 0; i < emptyList.Count; i++)
+            {
+                board[emptyList[i]] = MarkType.Nought;
+                score = Math.Min(score, MaxSearch());
+                board[emptyList[i]] = MarkType.Free;
+            }
+
+            return score;
+        }
+
+        #endregion
+
     }
 }
